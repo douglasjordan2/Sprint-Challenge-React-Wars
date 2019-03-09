@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import Header from './components/Header';
 import Characters from './components/Characters';
 import Pages from './components/Pages';
+import Dogs from './components/DogsPage/Dogs'
 import './App.css';
 
 class App extends Component {
@@ -10,7 +13,8 @@ class App extends Component {
       starwarsChars: [],
       url: 'https://swapi.co/api/people/?page=',
       current: 1,
-      firstPage: 'https://swapi.co/api/people/'
+      firstPage: 'https://swapi.co/api/people/',
+      dog: ''
     };
   }
 
@@ -26,6 +30,7 @@ class App extends Component {
 
   componentDidMount() {
     this.getCharacters('https://swapi.co/api/people/');
+    this.getDogs(`https://dog.ceo/api/breed/hound/images/random`)
   }
 
   getCharacters = URL => {
@@ -34,35 +39,56 @@ class App extends Component {
     // We then take that data and resolve it our state.
     fetch(URL)
       .then(res => {
-        console.log(res)
         return res.json();
       })
       .then(data => {
-        console.log(data)
         this.setState({ starwarsChars: data.results });
       })
       .catch(err => {
         throw new Error(err);
       });
-
-      
   };
+
+  getDogs = URL => {
+    fetch(URL)
+      .then(res => {
+        return res.json();
+      })
+      .then(data => {
+        console.log(data)
+        this.setState({ dog: data.message });
+      })
+      .catch(err => {
+        throw new Error(err)
+      })
+  }
 
   render() {
     
     return (
-      <div className="App">
-        <h1 className="Header">React Wars</h1>
-        <Pages 
-          url = { this.state.url }
-          current = { this.state.current }
-          nextPage = { this.nextPage }
-          prevPage = { this.prevPage }
-        />
-        <Characters
-          characters = { this.state.starwarsChars }
-        />
-      </div>
+      <Router>
+        <div className="App">
+          <Header />
+          <Route exact path="/" render={props => (
+            <React.Fragment>
+              <Pages 
+                url = { this.state.url }
+                current = { this.state.current }
+                nextPage = { this.nextPage }
+                prevPage = { this.prevPage }
+              />
+              <Characters
+                characters = { this.state.starwarsChars }
+              />
+            </React.Fragment>
+          )} />
+          <Route path="/dogs" render={props =>(
+            <Dogs 
+              dog = { this.state.dog }
+            />
+          )}/>
+        </div>
+      </Router>
     );
   }
 }
